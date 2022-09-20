@@ -176,12 +176,20 @@ def train():
                 it, cfg.max_iter, lr, time_meter, loss_meter,
                 loss_pre_meter, loss_aux_meters)
         lr_schdr.step()
-        if (it + 1) % 500 == 0:
+        if (it + 1) % 200 == 0:
             save_pth = osp.join(cfg.respth, f'model_{it}.pth')
             # save_pth = osp.join(cfg.respth, 'model_final.pth')
             logger.info('\nsave models to {}'.format(save_pth))
             state = net.module.state_dict()
             if dist.get_rank() == 0: torch.save(state, save_pth)
+
+
+            # logger.info(f'\nevaluating the {it} model')
+            # iou_heads, iou_content, f1_heads, f1_content = eval_model(cfg, net.module)
+            # logger.info('\neval results of f1 score metric:')
+            # logger.info('\n' + tabulate(f1_content, headers=f1_heads, tablefmt='orgtbl'))
+            # logger.info('\neval results of miou metric:')
+            # logger.info('\n' + tabulate(iou_content, headers=iou_heads, tablefmt='orgtbl'))
 
     ## dump the final model and evaluate the result
     save_pth = osp.join(cfg.respth, 'model_final.pth')

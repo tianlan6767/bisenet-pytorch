@@ -26,9 +26,9 @@ NOTE: replace torchrun with torch.distributed.launch if you use older version of
 
 
 ## bisenetv2 cocostuff
-export CUDA_VISIBLE_DEVICES=0,1,2
+export CUDA_VISIBLE_DEVICES=0,1
 cfg_file=configs/bisenetv2_coco.py
-NGPUS=3
+NGPUS=2
 torchrun --nproc_per_node=$NGPUS tools/train_amp.py --config $cfg_file
 
 

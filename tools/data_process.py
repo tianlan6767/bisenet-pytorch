@@ -54,7 +54,9 @@ def json2mask(src, dst, jf):
         if not osp.exists(osp.join(dst, imn.replace(".bmp", ".png"))):
             cv2.imwrite(osp.join(dst, imn.replace(".bmp", ".png")), mark)
     print(sorted(tuple(set(classes_ids))))
-        
+
+
+
 if __name__ == "__main__":
     parse = argparse.ArgumentParser()
     parse.add_argument('--imgs_path', type=str, default='',)

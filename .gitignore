@@ -108,6 +108,7 @@ play.py
 preprocess_data.py
 res/
 res1/
+res*
 adj.md
 tensorrt/build/*
 datasets/coco/train.txt

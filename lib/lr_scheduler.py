@@ -24,6 +24,7 @@ class WarmupLrScheduler(torch.optim.lr_scheduler._LRScheduler):
     def get_lr(self):
         ratio = self.get_lr_ratio()
         lrs = [ratio * lr for lr in self.base_lrs]
+        # lrs = [0.00001 for _ in self.base_lrs]
         return lrs
 
     def get_lr_ratio(self):

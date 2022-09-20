@@ -80,11 +80,11 @@ def mask2json(img_seg, imn, label_count=25, min_region=50):
 # args
 parse = argparse.ArgumentParser()
 parse.add_argument('--config', dest='config', type=str, default='/workspace/bisenet/BiSeNet/configs/bisenetv2_coco.py',)
-parse.add_argument('--weight-path', type=str, default='/workspace/bisenet/BiSeNet/res1/model_4999.pth',)
+parse.add_argument('--weight-path', type=str, default='/workspace/bisenet/BiSeNet/res6/model_13599.pth',)
 args = parse.parse_args()
 cfg = set_cfg_from_file(args.config)
-src = r'/workspace/data/855G2/images/train'
-dst = r"/workspace/data/855G2/test"
+src = r'/workspace/data/855G2/test/test/small-regions'
+dst = r"/workspace/data/855G2/test/test/inf"
 Path(dst).mkdir(parents=True, exist_ok=True)
 device = torch.device("cuda:2")
 palette = np.random.randint(0, 256, (256, 3), dtype=np.uint8)
@@ -133,7 +133,7 @@ for imp in tqdm(imps):
 
     pred = palette[out]
     # cv2.imwrite(osp.join(dst, imn.replace(".bmp", ".png")), pred)
-save_json(dst, imgs_info, "info_bisenet")
+save_json(dst, imgs_info, "info_bisenet-model_14199-test")
 print("{}张图片,每张图片耗时{}".format(len(inf_times), sum(inf_times)/len(inf_times)))
 print(inf_times)
 

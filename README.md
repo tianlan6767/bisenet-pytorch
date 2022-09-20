@@ -1,39 +1,5 @@
 # BiSeNetV1 & BiSeNetV2
 
-My implementation of [BiSeNetV1](https://arxiv.org/abs/1808.00897) and [BiSeNetV2](https://arxiv.org/abs/2004.02147).
-
-
-mIOUs and fps on cityscapes val set:
-| none | ss | ssc | msf | mscf | fps(fp16/fp32) | link |
-|------|:--:|:---:|:---:|:----:|:---:|:----:|
-| bisenetv1 | 75.44 | 76.94 | 77.45 | 78.86 | 78/25 | [download](https://github.com/CoinCheung/BiSeNet/releases/download/0.0.0/model_final_v1_city_new.pth) |
-| bisenetv2 | 74.95 | 75.58 | 76.53 | 77.08 | 67/26 | [download](https://github.com/CoinCheung/BiSeNet/releases/download/0.0.0/model_final_v2_city.pth) |
-
-mIOUs on cocostuff val2017 set:
-| none | ss | ssc | msf | mscf | link |
-|------|:--:|:---:|:---:|:----:|:----:|
-| bisenetv1 | 31.49 | 31.42 | 32.46 | 32.55 | [download](https://github.com/CoinCheung/BiSeNet/releases/download/0.0.0/model_final_v1_coco_new.pth) |
-| bisenetv2 | 30.49 | 30.55 | 31.81 | 31.73 | [download](https://github.com/CoinCheung/BiSeNet/releases/download/0.0.0/model_final_v2_coco.pth) |
-
-mIOUs on ade20k val set:
-| none | ss | ssc | msf | mscf | link |
-|------|:--:|:---:|:---:|:----:|:----:|
-| bisenetv1 | 36.15 | 36.04 | 37.27 | 36.58 | [download](https://github.com/CoinCheung/BiSeNet/releases/download/0.0.0/model_final_v1_ade20k.pth) |
-| bisenetv2 | 32.53 | 32.43 | 33.23 | 31.72 | [download](https://github.com/CoinCheung/BiSeNet/releases/download/0.0.0/model_final_v2_ade20k.pth) |
-
-Tips: 
-
-1. **ss** means single scale evaluation, **ssc** means single scale crop evaluation, **msf** means multi-scale evaluation with flip augment, and **mscf** means multi-scale crop evaluation with flip evaluation. The eval scales and crop size of multi-scales evaluation can be found in [configs](./configs/).
-
-2. The fps is tested in different way from the paper. For more information, please see [here](./tensorrt).
-
-3. The authors of bisenetv2 used cocostuff-10k, while I used cocostuff-123k(do not know how to say, just same 118k train and 5k val images as object detection). Thus the results maybe different from paper. 
-
-4. The authors did not report results on ade20k, thus there is no official training settings, here I simply provide a "make it work" result. Maybe the results on ade20k can be boosted with better settings.
-
-5. The model has a big variance, which means that the results of training for many times would vary within a relatively big margin. For example, if you train bisenetv2 on cityscapes for many times, you will observe that the result of **ss** evaluation of bisenetv2 varies between 73.1-75.1. 
-
-
 ## deploy trained models
 
 1. tensorrt  
@@ -78,64 +44,21 @@ $ python tools/demo_video.py --config configs/bisenetv2_coco.py --weight-path re
 This would generate segmentation file as `res.mp4`. If you want to read from camera, you can set `--input camera_id` rather than `input ./video.mp4`.   
 
 
-## prepare dataset
-
-1.cityscapes  
-
-Register and download the dataset from the official [website](https://www.cityscapes-dataset.com/). Then decompress them into the `datasets/cityscapes` directory:  
+4.custom dataset 
 ```
-$ mv /path/to/leftImg8bit_trainvaltest.zip datasets/cityscapes
-$ mv /path/to/gtFine_trainvaltest.zip datasets/cityscapes
-$ cd datasets/cityscapes
-$ unzip leftImg8bit_trainvaltest.zip
-$ unzip gtFine_trainvaltest.zip
-```
-
-2.cocostuff   
-
-Download `train2017.zip`, `val2017.zip` and `stuffthingmaps_trainval2017.zip` split from official [website](https://cocodataset.org/#download). Then do as following:  
-```
-$ unzip train2017.zip
-$ unzip val2017.zip
-$ mv train2017/ /path/to/BiSeNet/datasets/coco/images
-$ mv val2017/ /path/to/BiSeNet/datasets/coco/images
-
-$ unzip stuffthingmaps_trainval2017.zip
-$ mv train2017/ /path/to/BiSeNet/datasets/coco/labels
-$ mv val2017/ /path/to/BiSeNet/datasets/coco/labels
-
-$ cd /path/to/BiSeNet
-$ python tools/gen_dataset_annos.py --dataset coco
+    数据保存路径
+        - root-path
+            - images
+               - train(*.bmp, *.json)
+               - val()
+               - test()
+            -labels
+               - train(*.txt)
+    命令：[here](data.sh)
+        修改：各文件对应的保存路径 
+        *run data.sh**
 ```
 
-3.ade20k
-
-Download `ADEChallengeData2016.zip` from this [website](http://sceneparsing.csail.mit.edu/) and unzip it. Then we can move the uncompressed folders to `datasets/ade20k`, and generate the txt files with the script I prepared for you:  
-```
-$ unzip ADEChallengeData2016.zip
-$ mv ADEChallengeData2016/images /path/to/BiSeNet/datasets/ade20k/
-$ mv ADEChallengeData2016/annotations /path/to/BiSeNet/datasets/ade20k/
-$ python tools/gen_dataset_annos.py --ade20k
-```
-
-
-4.custom dataset  
-
-If you want to train on your own dataset, you should generate annotation files first with the format like this: 
-```
-munster_000002_000019_leftImg8bit.png,munster_000002_000019_gtFine_labelIds.png
-frankfurt_000001_079206_leftImg8bit.png,frankfurt_000001_079206_gtFine_labelIds.png
-...
-```
-Each line is a pair of training sample and ground truth image path, which are separated by a single comma `,`.   
-
-I recommand you to check the information of your dataset with the script:  
-```
-$ python tools/check_dataset_info.py --im_root /path/to/your/data_root --im_anns /path/to/your/anno_file
-```
-This will print some of the information of your dataset.  
-
-Then you need to change the field of `im_root` and `train/val_im_anns` in the config file. I prepared a demo config file for you named [`bisenet_customer.py`](./configs/bisenet_customer.py). You can start from this conig file.
 
 
 ## train
@@ -155,18 +78,69 @@ $ export CUDA_VISIBLE_DEVICES=0,1
 $ torchrun --nproc_per_node=2 tools/train_amp.py --finetune-from ./res/model_final.pth --config ./configs/bisenetv2_city.py # or bisenetv1
 ```
 
+## 数据修改：
+* 配置参数修改 文件路径
+    configs/bisenetv2_coco.py
+    ```
+        cfg = dict(
+        model_type='bisenetv2',
+        n_cats=2,     # 修改类别，包括背景
+        num_aux_heads=4,
+        lr_start=1e-3,  #
+        weight_decay=1e-4,
+        warmup_iters=100,
+        max_iter=4000,
+        dataset='CocoStuff',
+        im_root='/workspace/data/855G3',
+        train_im_anns='/workspace/data/855G3/train.txt',  # 训练集文件路径
+        val_im_anns='/workspace/data/855G3/train.txt',    # 验证集文件路径
+        scales=[0.75, 2.],
+        cropsize=[2048, 2048],                         # 裁剪尺寸
+        eval_crop=[2048, 2048],                        # 裁剪尺寸 
+        eval_scales=[0.5, 0.75, 1, 1.25, 1.5, 1.75],
+        ims_per_gpu=4,
+        eval_ims_per_gpu=4,
+        use_fp16=True,
+        use_sync_bn=True,
+        respth='./res-ly',
+)
+    ```
+* coco.py文件修改：文件路径：/workspace/bisenet/BiSeNet/lib/data/coco.py
+    ```
+    class CocoStuff(BaseDataset):
 
-## eval pretrained models
-You can also evaluate a trained model like this: 
+        def __init__(self, dataroot, annpath, trans_func=None, mode='train'):
+            super(CocoStuff, self).__init__(
+                    dataroot, annpath, trans_func, mode)
+            self.n_cats = 2 # 修改类别
+            self.lb_ignore = 255
+
+            ## label mapping, remove non-existing labels
+            # missing = [11, 25, 28, 29, 44, 65, 67, 68, 70, 82, 90]
+            # remain = [ind for ind in range(182) if not ind in missing]
+            self.lb_map = np.arange(2).astype(np.uint8)   # 修改数量
+            # for ind in remain:
+                # self.lb_map[ind] = remain.index(ind)
+
+            self.to_tensor = T.ToTensor(
+                mean=(0.46962251, 0.4464104,  0.40718787), # coco, rgb
+                std=(0.27469736, 0.27012361, 0.28515933),
+            )   # 修改成计算好的结果
+            # print("cocostuff---------------")
+
+    ```
+* 调整固定学习率：文件路径/workspace/bisenet/BiSeNet/lib/lr_scheduler.py
 ```
-$ python tools/evaluate.py --config configs/bisenetv1_city.py --weight-path /path/to/your/weight.pth
+    def get_lr(self):
+        ratio = self.get_lr_ratio()
+        lrs = [ratio * lr for lr in self.base_lrs]
+        # lrs = [0.00001 for _ in self.base_lrs]
+        return lrs
 ```
-or you can use multi gpus:  
-```
-$ torchrun --nproc_per_node=2 tools/evaluate.py --config configs/bisenetv1_city.py --weight-path /path/to/your/weight.pth
-```
 
 
-### Be aware that this is the refactored version of the original codebase. You can go to the `old` directory for original implementation if you need, though I believe you will not need it.
+## 模型训练[here](dist_train.sh)
+* bash dist_train.sh
 
-
+## 模型推理[here](./tools/demo.py)
+* 修改配置文件路径，权重文件路径，图片路径

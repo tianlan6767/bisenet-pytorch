@@ -49,13 +49,13 @@ class CocoStuff(BaseDataset):
     def __init__(self, dataroot, annpath, trans_func=None, mode='train'):
         super(CocoStuff, self).__init__(
                 dataroot, annpath, trans_func, mode)
-        self.n_cats = 3 # 91 stuff, 91 thing, 11 of thing have no annos
+        self.n_cats = 2 # 91 stuff, 91 thing, 11 of thing have no annos
         self.lb_ignore = 255
 
         ## label mapping, remove non-existing labels
         # missing = [11, 25, 28, 29, 44, 65, 67, 68, 70, 82, 90]
         # remain = [ind for ind in range(182) if not ind in missing]
-        self.lb_map = np.arange(3).astype(np.uint8)
+        self.lb_map = np.arange(2).astype(np.uint8)
         # for ind in remain:
             # self.lb_map[ind] = remain.index(ind)
 
